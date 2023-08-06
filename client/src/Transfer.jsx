@@ -1,11 +1,29 @@
 import { useState } from "react";
 import server from "./server";
 
-function Transfer({ address, setBalance }) {
+function Transfer({ address, setBalance, signature, setSignature, transaction, setTransaction }) {
   const [sendAmount, setSendAmount] = useState("");
   const [recipient, setRecipient] = useState("");
 
   const setValue = (setter) => (evt) => setter(evt.target.value);
+  let updateTransaction = (recipient, amount) => {
+      let transaction = {
+          recipient: recipient,
+          amount: amount,
+      };
+      let transactionJson = JSON.stringify(transaction);
+      setTransaction(transactionJson);
+  };
+  async function onAmountChange(evt) {
+      setSendAmount(evt.target.value);
+
+      updateTransaction(recipient, evt.target.value);
+  }
+  async function onRecipientChange(evt) {
+      setRecipient(evt.target.value);
+
+      updateTransaction(evt.target.value, sendAmount);
+  }
 
   async function transfer(evt) {
     evt.preventDefault();
@@ -17,6 +35,7 @@ function Transfer({ address, setBalance }) {
         sender: address,
         amount: parseInt(sendAmount),
         recipient,
+        signature,
       });
       setBalance(balance);
     } catch (ex) {
@@ -33,7 +52,7 @@ function Transfer({ address, setBalance }) {
         <input
           placeholder="1, 2, 3..."
           value={sendAmount}
-          onChange={setValue(setSendAmount)}
+          onChange={onAmountChange}
         ></input>
       </label>
 
@@ -42,8 +61,19 @@ function Transfer({ address, setBalance }) {
         <input
           placeholder="Type an address, for example: 0x2"
           value={recipient}
-          onChange={setValue(setRecipient)}
+          onChange={onRecipientChange}
         ></input>
+      </label>
+
+      <div className="transaction">Transaction: {transaction}</div>
+
+      <label>
+        Signature
+        <input
+            placeholder="Paste the transaction signature"
+            value={signature}
+            onChange={setValue(setSignature)}>
+        </input>
       </label>
 
       <input type="submit" className="button" value="Transfer" />

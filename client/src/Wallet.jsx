@@ -1,3 +1,4 @@
+
 import server from "./server";
 
 function Wallet({ address, setAddress, balance, setBalance }) {
